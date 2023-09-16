@@ -42,10 +42,18 @@ optimizer: optimizer
 network passes: number of epochs over network we perform
 learning rate: learning rate'''
 
-p = 24
-y = 9
+p = 7
+y = 5
 
 #######################################################################
+
+#Define function to add elements on to the end of a list.
+def merger(seglist):
+  total_list = []
+  for seg in seglist:
+    #Add given elements of input list to the end.
+    total_list.extend(seg)
+  return total_list
 
 #Define a function to receive data from file.
 def extract_data():
@@ -63,20 +71,20 @@ def convert_data(input_data_array):
 
 #Define a function to split data into training and testing data.
 #We don't necessarily need this, but it's nice to have! 
-def training_testing_data(all_sensor_data, all_recorded_outputs, all_possible_outputs):
+#def training_testing_data(all_sensor_data, all_recorded_outputs, all_possible_outputs):
      
     #Create index IDs and shuffle them, then grab half of them to be training data.
-    index_ids = np.arange(len(all_recorded_outputs))
-    np.random.shuffle(index_ids)
-    train_indices = index_ids[:math.floor(0.5*len(all_sensor_data))]
-    training_data = all_sensor_data[train_indices]
+    #index_ids = np.arange(len(all_recorded_outputs))
+    #np.random.shuffle(index_ids)
+    #train_indices = index_ids[:math.floor(0.5*len(all_sensor_data))]
+    #training_data = all_sensor_data[train_indices]
 
     #... ad nauseum, I won't finish this function for now because we don't really need 
     #this for the purposes of this hackathon.
 
 #######################################################################
 
-#Actual neural network code:
+#Initializing neural network code:
 
 #Create class for our NN:
 class NeuralNetwork(nn.Module):
@@ -148,6 +156,65 @@ def pass_to_NN_training(network_passes, learning_rate, all_sensor_data, all_reco
         training_step_loss = train_NN(model, loss_fn, optimizer, training_pass_loss, training_sensor_data, training_output_data)
         #And append it to an array to store it.
         training_losses.append(training_step_loss)
+
+    #INSERT FUNCTION HERE TO RETURN WEIGHTS
     
     return training_losses
+
+#Write a function to save our trained neural network weights.
+def save_weights(weights):
+
+    return
+
+#######################################################################
+
+#Actual neural network code, aka we're passing stuff to the neural network:
+
+#Write a function to load our trained neural network weights.
+def load_weights():
+
+    return
+
+#Define a function to actually classify some data.
+def classify_data(model, test_sensor_data):
+
+    #Convert our test sensor data to a pytorch tensor:
+    test_sensor_data = convert_data(test_sensor_data)
+
+    #Load and assign our weights:
+    model_weights = load_weights()
+    model.layer_1.weight = torch.nn.Parameter(model_weights)
+
+    #Initialize output list:
+    output_pred_list = []
         
+    with torch.no_grad():
+        #Put our model into testing mode:
+        model.eval()
+        test_sensor_data = test_sensor_data.to(device)
+        #Generate our predicted outputs:
+        outputs_test_pred = model(test_sensor_data.float())
+        #??? (x-files theme music plays)
+        _, output_pred_tags = torch.max(outputs_test_pred, dim = 1)
+        output_pred_list.append(output_pred_tags.cpu().numpy())
+    
+    if len(output_pred_list) > 1:
+        output_pred_list = [a.squeeze().tolist() for a in output_pred_list]
+        #Well we throw all these lists together here.
+        output_pred_list = merger(output_pred_list)
+    
+    return output_pred_list
+
+#######################################################################
+
+#Stuff we actually have to run idk gworl I'm so tired:
+
+#1. Extract training data from a file.
+
+#2. Train neural network using pass_to_NN_training
+
+#3. Save weights.
+
+#4. Extract testing data from a file.
+
+#6. Pass testing data to classify_data (which has in-built load weights function - note have to specify file path).
