@@ -1,3 +1,5 @@
+# This file is to test if a Python Script is capable of reading what Arduino Nano sends from serial port.
+
 import serial
 
 # Adjust this to your Arduino's serial port name and baud rate
