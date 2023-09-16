@@ -25,7 +25,7 @@ from torch.utils.data import Dataset, TensorDataset, DataLoader
 from torch.utils.data.dataset import random_split
 
 #device = 'cuda' if torch.cuda.is_available() else 'cpu'
-#DONT USE CUDA UNLESS YOU'RE ME (DAVID)
+#DONT!! USE CUDA UNLESS YOU'RE ME (DAVID)
 device = 'cpu'
 
 #######################################################################
@@ -36,7 +36,11 @@ input_data_array: any given array of data
 all_sensor_data: position data from glove sensors of size P, where for all p in p, len(p) >=  1
 all_recorded_outputs: outputs corresponding to each point of position data of size P
 all_possible_outputs: all possible outputs, e.g. for all p in P, p in all_possible_outputs
-y: number of possible outputs'''
+y: number of possible outputs
+loss_fn: loss function
+optimizer: optimizer
+network passes: number of epochs over network we perform
+learning rate: learning rate'''
 
 p = 24
 y = 9
@@ -93,3 +97,57 @@ class NeuralNetwork(nn.Module):
         x = self.activation_2(self.layer_2(x))
         x = self.activation_out(self.layer_out(x))
         return x
+    
+#Define a function to train our neural network.
+def train_NN(model, loss_fn, optimizer, training_pass_loss, training_sensor_data, training_output_data):
+    
+    #Put it into training mode:
+    model.train()
+    
+    #Send our training data to device:
+    training_sensor_data = training_sensor_data.to(device)
+    training_output_data = training_output_data.type(torch.LongTensor)
+    training_output_data = training_output_data.to(device)
+    optimizer.zero_grad()
+
+    #Compute predicted outputs given the sensor data:
+    predicted_outputs = model(training_sensor_data.float())
+    
+    #Compute loss between our energy values and our predicted energies:
+    train_loss = loss_fn(predicted_outputs, training_output_data)
+    #Complete backwards pass:
+    train_loss.backward()
+    optimizer.step()
+    training_pass_loss += train_loss.item()
+
+    return training_pass_loss
+
+#Define a function to pass data to our neural network during training.
+def pass_to_NN_training(network_passes, learning_rate, all_sensor_data, all_recorded_outputs, all_possible_outputs):
+    
+    #Grab device or whatever, I don't know, we just have to do it.
+    model = NeuralNetwork().to(device)
+    
+    #Declare loss function and optimizer we'd like to use.
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), learning_rate)
+
+    #Convert our data to tensors:
+    training_sensor_data = convert_data(all_sensor_data)
+    training_output_data = convert_data(all_recorded_outputs)
+    training_output_data = convert_data(all_possible_outputs)
+    
+    #Initialize loss value.
+    training_pass_loss = 0
+    #Initialize array to store our loss values.
+    training_losses = []
+    
+    #Make our training passes over the network.
+    for i in range(1, network_passes+1):
+        #Call our training NN.
+        training_step_loss = train_NN(model, loss_fn, optimizer, training_pass_loss, training_sensor_data, training_output_data)
+        #And append it to an array to store it.
+        training_losses.append(training_step_loss)
+    
+    return training_losses
+        
