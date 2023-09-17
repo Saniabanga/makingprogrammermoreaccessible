@@ -5,6 +5,7 @@ from PyQt5.QtGui import QFont
 from morse_to_word import decrypt
 import subprocess
 import qdarkstyle
+from sensor_to_morse import MorseUpdater
 
 currentLineIndex = 0
 ladderDiagram = "-------------------------------------------------------------------------------------------------------------------------------------()-----"
@@ -78,7 +79,8 @@ class LadderProgrammingConsole(QMainWindow):
 
         self.code_editor = QTextEdit(self)
         layout_second_tab.addWidget(self.code_editor)
-
+        self.morse_updater = MorseUpdater()
+        self.morse_updater.morseUpdated.connect(self.update_morse_editor)
         # Set the font for the code_editor
         font = QFont("Courier New", 10)
         self.code_editor.setFont(font)
@@ -108,7 +110,43 @@ class LadderProgrammingConsole(QMainWindow):
 
         font_label = QFont("Verdana", 9)
         self.output_label.setFont(font_label)
+    def convert_morse_to_english(self, morse_text):
+        MORSE_CODE_DICT = { 'a':'.-', 'b':'-...', 'c':'-.-.', 'd':'-..', 'e':'.',
+                            'f':'..-.', 'g':'--.', 'h':'....', 'i':'..', 'j':'.---',
+                            'k':'-.-', 'l':'.-..', 'm':'--', 'n':'-.', 'o':'---',
+                            'p':'.--.', 'q':'--.-', 'r':'.-.', 's':'...', 't':'-',
+                            'u':'..-', 'v':'...-', 'w':'.--', 'x':'-..-', 'y':'-.--',
+                            'z':'--..', '1':'.----', '2':'..---', '3':'...--',
+                            '4':'....-', '5':'.....', '6':'-....', '7':'--...',
+                            '8':'---..', '9':'----.', '0':'-----', ', ':'--..--',
+                            '.':'.-.-.-', '?':'..--..', '/':'-..-.', '-':'-....-',
+                            '(':'-.--.', ')':'-.--.-', ':': '---...', '"':'.-..-.'}
+    
+        def decrypt(message):
+            message += ' '
+            decipher = ''
+            citext = ''
+            if (len(message) > 0):
 
+                for letter in message:
+                    if (letter != ' '):
+                        i = 0
+                        citext += letter
+                    else:
+                        i += 1
+                        if i == 2:
+                            decipher += ' '
+                        else:
+                            decipher += list(MORSE_CODE_DICT.keys())[list(MORSE_CODE_DICT.values()).index(citext)]
+                            citext = ''
+            return decipher
+
+        return decrypt(morse_text)
+    def update_morse_editor(self, morse_text):
+        # self.code_editor.append(morse_text)
+        english_text = self.convert_morse_to_english(morse_text)
+        if (english_text != ''):
+            self.code_editor.append(english_text)
     def run_python_code(self):
         code = self.code_editor.toPlainText()
         with open("userWritten.py", "w") as file:
