@@ -7,6 +7,7 @@ import subprocess
 import qdarkstyle
 from sensor_to_morse import MorseUpdater
 
+
 currentLineIndex = 0
 ladderDiagram = "-------------------------------------------------------------------------------------------------------------------------------------()-----"
 nextLine = "--------------------------------------------------------------------------------------------------------------------------------------------"
@@ -120,7 +121,7 @@ class LadderProgrammingConsole(QMainWindow):
                             '4':'....-', '5':'.....', '6':'-....', '7':'--...',
                             '8':'---..', '9':'----.', '0':'-----', ', ':'--..--',
                             '.':'.-.-.-', '?':'..--..', '/':'-..-.', '-':'-....-',
-                            '(':'-.--.', ')':'-.--.-', ':': '---...', '"':'.-..-.'}
+                            '(':'-.--.', ')':'-.--.-', ':': '---...', '"':'.-..-.', ' ': '.-.-'}
     
         def decrypt(message):
             message += ' '
@@ -219,11 +220,13 @@ class LadderProgrammingConsole(QMainWindow):
 
         result_text = str(result)
         self.output_label.setText(result_text)
-
+    def triggerOnButton(self):
+        self.on_btn_function
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
     window = LadderProgrammingConsole()
     window.show()
+    # window.triggerOnButton()
     sys.exit(app.exec_())

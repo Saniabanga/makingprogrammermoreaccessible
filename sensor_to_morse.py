@@ -5,7 +5,7 @@ from PyQt5.QtCore import QTimer, pyqtSignal, QObject
 
 class MorseUpdater(QObject):
     morseUpdated = pyqtSignal(str)
-
+    OnUpdated = pyqtSignal(bool)
     def __init__(self):
         super().__init__()
         
@@ -37,29 +37,18 @@ class MorseUpdater(QObject):
                         self.last_modified = current_time
 
                         # Process and emit the Morse code (if needed)
-                        self.process_variables()
+                        # self.process_variables()
                         morse_text =  self.process_variables()
+                        with open('morse.txt', 'w') as file:
+                            pass
+                        # with open('morse.txt', 'w') as file:
+                        #     pass
                         print(morse_text)
                         if morse_text:
                             self.morseUpdated.emit(morse_text)
                         self.last_modified = current_time
                         self.last_variables = variables
-    # def update_morse(self):
-    #     current_time = time.time()
-    #     if current_time - self.last_modified > 2:  # Check if morse.txt has been modified
-    #         with open('morse.txt', 'r') as file:
-    #             lines = file.readlines()
-    #             if lines:
-    #                 variables = eval(lines[0].strip())
-    #                 if isinstance(variables, list) and all(isinstance(v, bool) for v in variables[0]):
-    #                     self.variables = variables
-    #                     self.last_modified = current_time
 
-    #                     # Process and emit the Morse code (if needed)
-    #                     morse_text = self.process_variables()
-    #                     if morse_text:
-    #                         self.morseUpdated.emit(morse_text)
-    #                     self.last_variables = variables 
 
 
 
@@ -67,8 +56,8 @@ class MorseUpdater(QObject):
 
  
     def process_variables(self):
-        # print(0)
         morse_word = ""
+        on_update = False
         for i in range(len(self.variables)):
             if (self.variables[i][0] and not self.variables[i][1] and not self.variables[i][2] and not self.variables[i][3] and not self.variables[i][4]):
                 print(1)
@@ -82,26 +71,14 @@ class MorseUpdater(QObject):
                 self.morse_words.append(morse_word)
                 # morse_word = "" 
                 # print(morse_word)
+            elif (not self.variables[i][0] and self.variables[i][1] and not self.variables[i][2] and not self.variables[i][3] and not self.variables[i][4]):
+                print(4)
+                on_update = True
+                self.OnUpdated.emit(on_update)
+
+
             
         return morse_word
-    # def process_variables(self):
-    # morse_word = ""
-    # for i in range(len(self.variables)):
-    #     if (self.variables[i][0] and not self.variables[i][1] and not self.variables[i][2] and not self.variables[i][3] and not self.variables[i][4]):
-    #         morse_word += "."
-    #     elif (not self.variables[i][0] and not self.variables[i][1] and self.variables[i][2] and not self.variables[i][3] and not self.variables[i][4]):
-    #         morse_word += "-"
-    #     elif (not self.variables[i][0] and not self.variables[i][1] and not self.variables[i][2] and self.variables[i][3] and not self.variables[i][4]):
-    #         morse_word += " "
-    
-    # # Check if the Morse code represents a complete word
-    # if morse_word.endswith(" "):
-    #     self.morse_words.append(morse_word)
-    #     morse_text = "".join(self.morse_words)
-    #     self.morse_words = []  # Reset the list for the next word
-    #     return morse_text
-
-    # return None
     
     
 

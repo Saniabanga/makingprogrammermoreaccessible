@@ -40,35 +40,36 @@ try:
             trigger = 1
             with open('morse.txt', 'w') as file:
                 # Write content to the file
-                file.write(str([True,False,False,False,False]))
+                file.write(str([[True,False,False,False,False]]))
+            # print("trig1")
             time.sleep(2)
         elif (pointTwo > 1.5 and pointSide == False and trigger != 3):
             pointSide = True
             trigger = 2
             with open('morse.txt', 'w') as file:
                 # Write content to the file
-                file.write(str([False,True,False,False,False]))
+                file.write(str([[False,True,False,False,False]]))
             time.sleep(2)
         elif (middleOne > 3 and middleDown == False):
             middleDown = True
             trigger = 3
             with open('morse.txt', 'w') as file:
                 # Write content to the file
-                file.write(str([False,False,True,False,False]))
+                file.write(str([[False,False,True,False,False]]))
             time.sleep(3)
         elif (thumbOne > 2.5 and thumbDown == False):
             thumbDown = True
             trigger = 4
             with open('morse.txt', 'w') as file:
                 # Write content to the file
-                file.write(str([False,False,False,True,False]))
+                file.write(str([[False,False,False,True,False]]))
             time.sleep(2)
         elif (thumbTwo > 2 and thumbSide == False):
             thumbSide = True
             trigger = 5
             with open('morse.txt', 'w') as file:
                 # Write content to the file
-                file.write(str([False,False,False,False,True]))
+                file.write(str([[False,False,False,False,True]]))
             time.sleep(2)
         else:
             pointDown = False
