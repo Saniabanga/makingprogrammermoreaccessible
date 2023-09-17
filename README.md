@@ -1,4 +1,5 @@
 # Make programming More Accessible!
+https://youtu.be/tSYJNM-VGHw?si=F-Eu9T0XF9Ex30Oa
 # Inspiration
 In the era of information where innovation and creation are at the forefront,everyone should have the opportunity to shape and innovate, yet countless individuals with disabilities find the doorway to programming out of reach. Recongnizing the pressing need for inclusivity, we were inspired to create a tool that could bridge the gap, leading to the birth of Joynts.
 
