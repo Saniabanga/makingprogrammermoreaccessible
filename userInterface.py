@@ -1,6 +1,10 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton,
-                             QHBoxLayout, QVBoxLayout, QWidget, QTextEdit, QLabel)
+                             QHBoxLayout, QVBoxLayout, QWidget, QTextEdit, QLabel, QTabWidget)
+from PyQt5.QtGui import QFont
+from morse_to_word import decrypt
+import subprocess
+import qdarkstyle
 
 currentLineIndex = 0
 ladderDiagram = "-------------------------------------------------------------------------------------------------------------------------------------()-----"
@@ -23,20 +27,27 @@ class LadderProgrammingConsole(QMainWindow):
         self.setWindowTitle('PLC Ladder Programming Console')
         self.setGeometry(100, 100, 800, 400)  # Adjusted the size
 
-        # Main layout
-        main_layout = QVBoxLayout()
+        # Main tab widget
+        self.tab_widget = QTabWidget(self)
+
+        # --- First Tab ---
+        first_tab_content = QWidget()
+
+        # Main layout for the first tab
+        main_layout_first_tab = QVBoxLayout()
+        # Set spacing and margins for the main layout
+        main_layout_first_tab.setSpacing(10)
+        main_layout_first_tab.setContentsMargins(10, 10, 10, 10)
 
         # Horizontal layout for buttons
         btn_layout = QHBoxLayout()
 
         # Create buttons
-
         self.on_btn = QPushButton('ON', self)
         self.off_btn = QPushButton('OFF', self)
         self.parallel_on_btn = QPushButton('Parallel On', self)
         self.parallel_off_btn = QPushButton('Parallel Off', self)
         self.run_btn = QPushButton('Run', self)
-
 
         # Add buttons to horizontal layout
         btn_layout.addWidget(self.on_btn)
@@ -45,22 +56,42 @@ class LadderProgrammingConsole(QMainWindow):
         btn_layout.addWidget(self.parallel_off_btn)
         btn_layout.addWidget(self.run_btn)
 
-
-        # Add the horizontal button layout to the main layout
-        main_layout.addLayout(btn_layout)
+        # Add the horizontal button layout to the main layout of the first tab
+        main_layout_first_tab.addLayout(btn_layout)
 
         # Add the display area
         self.text_display = QTextEdit(self)
         self.text_display.setText("\n".join(ladderDiagramList))
-        main_layout.addWidget(self.text_display)
+        main_layout_first_tab.addWidget(self.text_display)
 
         # Add a small output section at the bottom
         self.output_label = QLabel("Out displayed here", self)
-        main_layout.addWidget(self.output_label)
+        main_layout_first_tab.addWidget(self.output_label)
+        self.output_label.setStyleSheet("background-color: #f2f2f2; color: #333;")
 
-        central_widget = QWidget(self)
-        central_widget.setLayout(main_layout)
-        self.setCentralWidget(central_widget)
+        first_tab_content.setLayout(main_layout_first_tab)
+        self.tab_widget.addTab(first_tab_content, "Ladder Diagram")
+
+        # --- Second Tab (Mini Python IDE) ---
+        second_tab_content = QWidget()
+        layout_second_tab = QVBoxLayout()
+
+        self.code_editor = QTextEdit(self)
+        layout_second_tab.addWidget(self.code_editor)
+
+        # Set the font for the code_editor
+        font = QFont("Courier New", 10)
+        self.code_editor.setFont(font)
+
+        self.run_code_btn = QPushButton("Run", self)
+        self.run_code_btn.clicked.connect(self.run_python_code)
+        layout_second_tab.addWidget(self.run_code_btn)
+
+        second_tab_content.setLayout(layout_second_tab)
+        self.tab_widget.addTab(second_tab_content, "Mini Python IDE")
+
+        # Set the tab widget as the central widget
+        self.setCentralWidget(self.tab_widget)
 
         # Connect buttons to respective functionalities (to be implemented)
         self.on_btn.clicked.connect(self.on_btn_function)
@@ -68,9 +99,31 @@ class LadderProgrammingConsole(QMainWindow):
         self.parallel_off_btn.clicked.connect(self.parallel_off_btn_function)
         self.parallel_on_btn.clicked.connect(self.parallel_on_btn_function)
         self.run_btn.clicked.connect(self.run_btn_function)
-        # ... Do the same for other buttons
+        # Style buttons
+        self.on_btn.setStyleSheet("background-color: #333; color: #eee; border: 1px solid #555;")
+        self.off_btn.setStyleSheet("background-color: #333; color: #eee; border: 1px solid #555;")
+        self.parallel_on_btn.setStyleSheet("background-color: #333; color: #eee; border: 1px solid #555;")
+        self.parallel_off_btn.setStyleSheet("background-color: #333; color: #eee; border: 1px solid #555;")
+        self.run_btn.setStyleSheet("background-color: #333; color: #eee; border: 1px solid #555;")
 
-    # Implement the functionalities for the buttons
+        font_label = QFont("Verdana", 9)
+        self.output_label.setFont(font_label)
+
+    def run_python_code(self):
+        code = self.code_editor.toPlainText()
+        with open("userWritten.py", "w") as file:
+            file.write(code)
+
+        # Run the script
+        result = subprocess.run(["python", "userWritten.py"], capture_output=True, text=True)
+
+        # Optionally, display the output or errors in the IDE (can use a QLabel or another QTextEdit).
+        # Here's a simple example of displaying the output in a QLabel below the Run button:
+        output_label = QLabel(result.stdout if result.stdout else result.stderr, self)
+        self.output_label.setStyleSheet("background-color: #f2f2f2; color: #333;")
+        layout = self.tab_widget.currentWidget().layout()
+        layout.addWidget(output_label)
+
     def on_btn_function(self):
         global ladderDiagramList, currIdx
         # Your logic here
@@ -129,8 +182,10 @@ class LadderProgrammingConsole(QMainWindow):
         result_text = str(result)
         self.output_label.setText(result_text)
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
     window = LadderProgrammingConsole()
     window.show()
     sys.exit(app.exec_())
